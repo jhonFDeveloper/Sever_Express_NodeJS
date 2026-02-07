@@ -1,0 +1,13 @@
+[
+  {
+    "id": 2,
+    "title": "Laptop2",
+    "description": "Laptop gamer2",
+    "code": "LAP001",
+    "price": 1600,
+    "status": true,
+    "stock": 10,
+    "category": "Electrónica",
+    "thumbnails": []
+  }
+]
