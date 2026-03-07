@@ -1,13 +1,24 @@
 [
   {
-    "id": 2,
-    "title": "Laptop2",
-    "description": "Laptop gamer2",
-    "code": "LAP001",
-    "price": 1600,
+    "id": 1,
+    "title": "Pc",
+    "description": "Esto es un PC",
+    "code": "123",
+    "price": 2000,
     "status": true,
-    "stock": 10,
-    "category": "Electrónica",
+    "stock": 6,
+    "category": "tecnología",
+    "thumbnails": []
+  },
+  {
+    "id": 2,
+    "title": "Celular",
+    "description": "esto es un smarthpone",
+    "code": "1414",
+    "price": 600,
+    "status": true,
+    "stock": 4,
+    "category": "Tecnología",
     "thumbnails": []
   }
 ]
