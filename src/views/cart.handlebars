@@ -1,0 +1,56 @@
+<div class="vista-carrito">
+    <a href="/products" class="btn-volver">Seguir comprando</a>
+    <h1>Carrito 🛒</h1>
+    <p class="cart-id">ID: {{cartId}}</p>
+
+    {{#if carrito.products.length}}
+    <div class="lista-carrito">
+        {{#each carrito.products}}
+        <div class="item-carrito">
+            <div class="item-info">
+                <h3>{{this.product.title}}</h3>
+                <p>Categoria: {{this.product.category}}</p>
+                <p>Precio unitario: ${{this.product.price}}</p>
+            </div>
+            <div class="item-cantidad">
+                <span>Cantidad: {{this.quantity}}</span>
+                <span>Subtotal: ${{this.product.price}}</span>
+                <button class="btn-eliminar" onclick="eliminarProducto('{{../cartId}}', '{{this.product._id}}')">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+
+    <div class="carrito-total">
+        <strong>Total: ${{total}}</strong>
+        <button class="btn-vaciar" onclick="vaciarCarrito('{{cartId}}')">Vaciar carrito</button>
+    </div>
+
+    {{else}}
+    <p class="sin-productos">El carrito esta vacio.</p>
+    {{/if}}
+</div>
+
+<script>
+    async function eliminarProducto(cartId, productId) {
+        try {
+            const res = await fetch(`/api/carts/${cartId}/products/${productId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.status === 'success') location.reload();
+        } catch (error) {
+            alert('Error al eliminar el producto.');
+        }
+    }
+
+    async function vaciarCarrito(cartId) {
+        try {
+            const res = await fetch(`/api/carts/${cartId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.status === 'success') location.reload();
+        } catch (error) {
+            alert('Error al vaciar el carrito.');
+        }
+    }
+</script>

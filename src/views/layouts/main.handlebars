@@ -3,17 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda - Gestion de Productos</title>
+    <title>Tienda</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <nav>
-        <span>JF Accesorios Tecnológicos</span>
-        <a href="/">Inicio</a>
-        <a href="/realtimeproducts">Productos en Tiempo Real</a>
+        <span>| JF Accesorios Tecnológicos |</span>
+        <a href="/realtimeproducts">Tiempo Real</a>
+        <a href="/products">Productos</a>        
+        <a href="#" onclick="irAlCarrito()" style="margin-left:auto;">Carrito 🛒</a>
     </nav>
     <div class="container">
         {{{body}}}
     </div>
+    <script>
+        function irAlCarrito() {
+            const cartId = localStorage.getItem('cartId');
+            if (cartId) {
+                window.location.href = '/carts/' + cartId;
+            } else {
+                alert('Tu carrito esta vacio. Agrega productos primero.');
+            }
+        }
+    </script>
 </body>
 </html>

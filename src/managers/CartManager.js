@@ -1,70 +1,76 @@
-const fs = require('fs');
-const path = require('path');
+const Cart = require('../models/Cart');
 
 class CartManager {
 
-    constructor() {
-        this.rutaArchivo = path.join(__dirname, '../../data/carts.json');
+    async crearCarrito() {
+        const carrito = new Cart({ products: [] });
+        return await carrito.save();
     }
 
-    leerCarritos() {
-        try {
-            const datos = fs.readFileSync(this.rutaArchivo, 'utf-8');
-            return JSON.parse(datos);
-        } catch (error) {
-            return [];
-        }
+    async obtenerPorId(id) {
+        return await Cart.findById(id).populate('products.product').lean();
     }
 
-    guardarCarritos(carritos) {
-        fs.writeFileSync(this.rutaArchivo, JSON.stringify(carritos, null, 2));
-    }
+    async agregarProducto(cartId, productId) {
+        const carrito = await Cart.findById(cartId);
+        if (!carrito) return null;
 
-    crearCarrito() {
-        const carritos = this.leerCarritos();
-
-        let nuevoId = 1;
-        if (carritos.length > 0) {
-            const idsExistentes = carritos.map(c => c.id);
-            nuevoId = Math.max(...idsExistentes) + 1;
-        }
-
-        const nuevoCarrito = {
-            id: nuevoId,
-            products: []
-        };
-
-        carritos.push(nuevoCarrito);
-        this.guardarCarritos(carritos);
-        return nuevoCarrito;
-    }
-
-    obtenerPorId(id) {
-        const carritos = this.leerCarritos();
-        return carritos.find(carrito => carrito.id === id);
-    }
-
-    agregarProducto(cartId, productId) {
-        const carritos = this.leerCarritos();
-        const indice = carritos.findIndex(carrito => carrito.id === cartId);
-
-        if (indice === -1) {
-            return null;
-        }
-
-        const carrito = carritos[indice];
-        const productoExistente = carrito.products.find(p => p.product === productId);
+        const productoExistente = carrito.products.find(
+            p => p.product.toString() === productId
+        );
 
         if (productoExistente) {
             productoExistente.quantity += 1;
         } else {
-            carrito.products.push({
-                product: productId,
-                quantity: 1
-            });
+            carrito.products.push({ product: productId, quantity: 1 });
         }
 
-        this.guardarCarritos(carritos);
+        await carrito.save();
+        return await Cart.findById(cartId).populate('products.product').lean();
+    }
+
+    async eliminarProducto(cartId, productId) {
+        const carrito = await Cart.findById(cartId);
+        if (!carrito) return null;
+
+        carrito.products = carrito.products.filter(
+            p => p.product.toString() !== productId
+        );
+
+        await carrito.save();
+        return carrito;
+    }
+
+    async actualizarProductos(cartId, productos) {
+        const carrito = await Cart.findById(cartId);
+        if (!carrito) return null;
+
+        carrito.products = productos;
+        await carrito.save();
+        return await Cart.findById(cartId).populate('products.product').lean();
+    }
+
+    async actualizarCantidad(cartId, productId, quantity) {
+        const carrito = await Cart.findById(cartId);
+        if (!carrito) return null;
+
+        const producto = carrito.products.find(
+            p => p.product.toString() === productId
+        );
+
+        if (!producto) return null;
+
+        producto.quantity = quantity;
+        await carrito.save();
+        return await Cart.findById(cartId).populate('products.product').lean();
+    }
+
+    async vaciarCarrito(cartId) {
+        const carrito = await Cart.findById(cartId);
+        if (!carrito) return null;
+
+        carrito.products = [];
+        await carrito.save();
         return carrito;
     }
 }

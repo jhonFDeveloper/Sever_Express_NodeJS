@@ -1,99 +1,68 @@
-const fs = require('fs');
-const path = require('path');
+const Product = require('../models/Product');
 
 class ProductManager {
 
-    constructor() {
-        
-        this.rutaArchivo = path.join(__dirname, '../../data/products.json');
-    }
+    async obtenerTodos({ limit = 10, page = 1, sort, query } = {}) {
+        const filtro = {};
 
- 
-    leerProductos() {
-        try {
-            const datos = fs.readFileSync(this.rutaArchivo, 'utf-8');
-            return JSON.parse(datos);
-        } catch (error) {
-            return [];
-        }
-    }
-
-
-    guardarProductos(productos) {
-        fs.writeFileSync(this.rutaArchivo, JSON.stringify(productos, null, 2));
-    }
-
-
-    obtenerTodos() {
-        return this.leerProductos();
-    }
-
- 
-    obtenerPorId(id) {
-        const productos = this.leerProductos();
-        return productos.find(producto => producto.id === id);
-    }
-
-
-    crearProducto(datosProducto) {
-        const productos = this.leerProductos();
-        
-
-        let nuevoId = 1;
-        if (productos.length > 0) {
-            const idsExistentes = productos.map(p => p.id);
-            nuevoId = Math.max(...idsExistentes) + 1;
+        if (query) {
+            if (query === 'true' || query === 'false') {
+                filtro.status = query === 'true';
+            } else {
+                filtro.category = { $regex: query, $options: 'i' };
+            }
         }
 
-
-        const nuevoProducto = {
-            id: nuevoId,
-            title: datosProducto.title,
-            description: datosProducto.description,
-            code: datosProducto.code,
-            price: datosProducto.price,
-            status: datosProducto.status !== undefined ? datosProducto.status : true,
-            stock: datosProducto.stock,
-            category: datosProducto.category,
-            thumbnails: datosProducto.thumbnails || []
+        const opciones = {
+            limit: parseInt(limit),
+            page:  parseInt(page),
+            sort:  sort ? { price: sort === 'asc' ? 1 : -1 } : undefined,
+            lean:  true
         };
 
-        productos.push(nuevoProducto);
-        this.guardarProductos(productos);
-        return nuevoProducto;
-    }
+        const resultado = await Product.paginate(filtro, opciones);
 
+   
+        const params = new URLSearchParams();
+        params.set('limit', limit);
+        if (sort)  params.set('sort', sort);
+        if (query) params.set('query', query);
 
-    actualizarProducto(id, datosActualizados) {
-        const productos = this.leerProductos();
-        const indice = productos.findIndex(producto => producto.id === id);
+        const basePath = '/products';
 
-        if (indice === -1) {
-            return null;
-        }
-
- 
-        productos[indice] = {
-            ...productos[indice],
-            ...datosActualizados,
-            id: productos[indice].id 
+        return {
+            status:      'success',
+            payload:     resultado.docs,
+            totalPages:  resultado.totalPages,
+            prevPage:    resultado.prevPage,
+            nextPage:    resultado.nextPage,
+            page:        resultado.page,
+            hasPrevPage: resultado.hasPrevPage,
+            hasNextPage: resultado.hasNextPage,
+            prevLink:    resultado.hasPrevPage
+                ? `${basePath}?page=${resultado.prevPage}&${params.toString()}`
+                : null,
+            nextLink:    resultado.hasNextPage
+                ? `${basePath}?page=${resultado.nextPage}&${params.toString()}`
+                : null
         };
-
-        this.guardarProductos(productos);
-        return productos[indice];
     }
 
+    async obtenerPorId(id) {
+        return await Product.findById(id).lean();
+    }
 
-    eliminarProducto(id) {
-        const productos = this.leerProductos();
-        const productosFiltrados = productos.filter(producto => producto.id !== id);
+    async crearProducto(datos) {
+        const producto = new Product(datos);
+        return await producto.save();
+    }
 
-        if (productos.length === productosFiltrados.length) {
-            return false; 
-        }
+    async actualizarProducto(id, datos) {
+        return await Product.findByIdAndUpdate(id, datos, { new: true });
+    }
 
-        this.guardarProductos(productosFiltrados);
-        return true;
+    async eliminarProducto(id) {
+        return await Product.findByIdAndDelete(id);
     }
 }
 

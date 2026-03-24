@@ -5,15 +5,13 @@
     <div class="form-card">
         <h2>Agregar Producto</h2>
         <div class="campos">
-            <input id="title"       type="text"   placeholder="Nombre Producto *" />
-            <input id="description" type="text"   placeholder="Descripción *" />
-            <input id="code"        type="text"   placeholder="Código *" />
+            <input id="title"       type="text"   placeholder="Titulo *" />
+            <input id="description" type="text"   placeholder="Descripcion *" />
+            <input id="code"        type="text"   placeholder="Codigo *" />
             <input id="price"       type="number" placeholder="Precio *" />
             <input id="stock"       type="number" placeholder="Stock *" />
-            <input id="category"    type="text"   placeholder="Categoría *" />
-            <button class="btn-agregar" onclick="agregarProducto()">
-                Agregar Producto
-            </button>
+            <input id="category"    type="text"   placeholder="Categoria *" />
+            <button class="btn-agregar" onclick="agregarProducto()">Agregar Producto</button>
         </div>
         <p id="mensaje" class="mensaje"></p>
     </div>
@@ -22,20 +20,17 @@
         <h2>Productos Actuales</h2>
         <div id="lista-productos">
             {{#each productos}}
-            <div id="prod-{{this.id}}" class="producto-item">
+            <div id="prod-{{this._id}}" class="producto-item">
                 <div class="producto-info">
                     <strong>{{this.title}}</strong> — ${{this.price}}
                     <span> | {{this.category}} | Stock: {{this.stock}}</span>
                 </div>
-                <button class="btn-eliminar" onclick="eliminarProducto({{this.id}})">
+                <button class="btn-eliminar" onclick="eliminarProducto('{{this._id}}')">
                     Eliminar
                 </button>
             </div>
             {{/each}}
         </div>
-        {{#unless productos.length}}
-        <p class="sin-productos">No hay productos registrados aun.</p>
-        {{/unless}}
     </div>
 
 </div>
@@ -48,19 +43,19 @@
         const lista = document.getElementById('lista-productos');
         lista.innerHTML = '';
 
-        if (productos.length === 0) {
-            lista.innerHTML = '<p class="sin-productos">No hay productos registrados aun.</p>';
+        if (!productos.length) {
+            lista.innerHTML = '<p class="sin-productos">No hay productos.</p>';
             return;
         }
 
         productos.forEach(p => {
             lista.innerHTML += `
-                <div id="prod-${p.id}" class="producto-item">
+                <div id="prod-${p._id}" class="producto-item">
                     <div class="producto-info">
                         <strong>${p.title}</strong> — $${p.price}
                         <span> | ${p.category} | Stock: ${p.stock}</span>
                     </div>
-                    <button class="btn-eliminar" onclick="eliminarProducto(${p.id})">
+                    <button class="btn-eliminar" onclick="eliminarProducto('${p._id}')">
                         Eliminar
                     </button>
                 </div>

@@ -1,0 +1,53 @@
+<div class="detalle-producto">
+    <a href="/products" class="btn-volver">Volver</a>
+
+    <h1>{{producto.title}}</h1>
+    <p class="categoria">Categoria: {{producto.category}}</p>
+    <p class="descripcion">{{producto.description}}</p>
+
+    <div class="detalle-info">
+        <span class="precio">${{producto.price}}</span>
+        <span class="stock">Stock disponible: {{producto.stock}}</span>
+        <span class="codigo">Codigo: {{producto.code}}</span>
+        <span>Estado: {{#if producto.status}}Activo{{else}}Inactivo{{/if}}</span>
+    </div>
+
+    <div class="agregar-carrito">
+        <button onclick="agregarAlCarrito('{{producto._id}}')">Agregar al carrito</button>
+        <p id="msg-carrito"></p>
+    </div>
+</div>
+
+<script>
+
+    async function obtenerCarritoId() {
+        let cartId = localStorage.getItem('cartId');
+        if (!cartId) {
+            const res = await fetch('/api/carts', { method: 'POST' });
+            const data = await res.json();
+            cartId = data.payload._id;
+            localStorage.setItem('cartId', cartId);
+        }
+        return cartId;
+    }
+
+    async function agregarAlCarrito(productId) {
+        const msg = document.getElementById('msg-carrito');
+        try {
+            const cartId = await obtenerCarritoId();
+            const res = await fetch(`/api/carts/${cartId}/product/${productId}`, { method: 'POST' });
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                msg.textContent = 'Producto agregado al carrito!';
+                msg.style.color = 'green';
+            } else {
+                msg.textContent = 'Error: ' + data.message;
+                msg.style.color = 'red';
+            }
+        } catch (error) {
+            msg.textContent = 'Error al conectar con el servidor.';
+            msg.style.color = 'red';
+        }
+    }
+</script>

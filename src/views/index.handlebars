@@ -1,0 +1,72 @@
+<h1>Nuestros Productos</h1>
+
+
+<div class="filtros">
+    <select id="selectQuery">
+        <option value="">Todas las categorias</option>
+        <option value="Laptops"        {{#if (eq query 'Laptops')}}selected{{/if}}>Laptops</option>
+        <option value="Monitores"      {{#if (eq query 'Monitores')}}selected{{/if}}>Monitores</option>
+        <option value="Perifericos"    {{#if (eq query 'Perifericos')}}selected{{/if}}>Perifericos</option>
+        <option value="Componentes"    {{#if (eq query 'Componentes')}}selected{{/if}}>Componentes</option>
+        <option value="Almacenamiento" {{#if (eq query 'Almacenamiento')}}selected{{/if}}>Almacenamiento</option>
+        <option value="Redes"          {{#if (eq query 'Redes')}}selected{{/if}}>Redes</option>
+        <option value="Impresoras"     {{#if (eq query 'Impresoras')}}selected{{/if}}>Impresoras</option>
+        <option value="Accesorios"     {{#if (eq query 'Accesorios')}}selected{{/if}}>Accesorios</option>
+    </select>
+
+    <select id="selectSort">
+        <option value="">Sin orden</option>
+        <option value="asc"  {{#if (eq sort 'asc')}}selected{{/if}}>Precio: menor a mayor</option>
+        <option value="desc" {{#if (eq sort 'desc')}}selected{{/if}}>Precio: mayor a menor</option>
+    </select>
+
+    <button onclick="aplicarFiltros()">Buscar</button>
+</div>
+
+
+{{#if productos.length}}
+<div class="grid-productos">
+    {{#each productos}}
+    <div class="card-producto">
+        <h3>{{this.title}}</h3>
+        <p class="categoria">{{this.category}}</p>
+        <p class="precio">${{this.price}}</p>
+        <p class="stock">Stock: {{this.stock}}</p>
+        <div class="card-acciones">
+            <a href="/products/{{this._id}}" class="btn-ver">Ver detalle</a>
+        </div>
+    </div>
+    {{/each}}
+</div>
+
+
+<div class="paginacion">
+    {{#if hasPrevPage}}
+        <a href="{{prevLink}}" class="btn-pag">Anterior</a>
+    {{else}}
+        <span class="btn-pag disabled">Anterior</span>
+    {{/if}}
+
+    <span class="pagina-actual">Página {{page}} de {{totalPages}}</span>
+
+    {{#if hasNextPage}}
+        <a href="{{nextLink}}" class="btn-pag">Siguiente</a>
+    {{else}}
+        <span class="btn-pag disabled">Siguiente</span>
+    {{/if}}
+</div>
+
+{{else}}
+<p class="sin-productos">No se encontraron productos.</p>
+{{/if}}
+
+<script>
+    function aplicarFiltros() {
+        const query = document.getElementById('selectQuery').value;
+        const sort  = document.getElementById('selectSort').value;
+        let url = '/products?page=1';
+        if (query) url += `&query=${query}`;
+        if (sort)  url += `&sort=${sort}`;
+        window.location.href = url;
+    }
+</script>
